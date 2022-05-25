@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  rabbitmq:
+    container_name: rabbitmq_local
+    image: rabbitmq:management-alpine
+    ports:
+      - "5672:5672"
+      - "8080:15672"
+      - "4369:4369"
+    hostname: rabbitmq_local
+    volumes:
+        - rabbitmq_data:/var/lib/rabbitmq/
+        - rabbitmq_log:/var/log/rabbitmq/
+    networks:
+        - rabbitmq_go_net
+
+volumes:
+  rabbitmq_data:
+  rabbitmq_log:
+
+networks:
+  rabbitmq_go_net:
+    driver: bridge
