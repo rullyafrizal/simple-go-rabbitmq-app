@@ -25,7 +25,7 @@ func NewPosthandler(ch *amqp091.Channel) PostHandlerContract {
 }
 
 func (h *PostHandler) CreatePost() error {
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10; i++ {
 		post := models.Post{
 			ID:        i,
 			Title:     "This is post " + strconv.Itoa(i),

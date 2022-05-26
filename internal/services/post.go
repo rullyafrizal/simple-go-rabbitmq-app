@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"simple-go-rabbitmq-app/internal/models"
+	"strings"
 	"sync"
 
 	"github.com/rabbitmq/amqp091-go"
@@ -27,8 +29,8 @@ func NewPostService(ch *amqp091.Channel) PostServiceContract {
 
 func (p *PostService) PublishPost(post models.Post) error {
 	err := p.channel.ExchangeDeclare(
-		"post-exchange", // name
-		"fanout",
+		"post-exchange-direct", // name
+		"direct",
 		true,  // durable
 		false, // delete when unused
 		false, // exclusive
@@ -47,10 +49,10 @@ func (p *PostService) PublishPost(post models.Post) error {
 	log.Println("Publishing post to RabbitMQ...")
 
 	err = p.channel.Publish(
-		"post-exchange", // exchange
-		"",              // routing key
-		false,           // mandatory
-		false,           // immediate
+		"post-exchange-direct",              // exchange
+		determineRoutingKey(int64(post.ID)), // routing key
+		false,                               // mandatory
+		false,                               // immediate
 		amqp091.Publishing{
 			DeliveryMode: amqp091.Persistent, // the message will survive server restarts/down
 			ContentType:  "application/json",
@@ -68,8 +70,8 @@ func (p *PostService) PublishPost(post models.Post) error {
 
 func (p *PostService) ConsumePost() error {
 	err := p.channel.ExchangeDeclare(
-		"post-exchange", // name
-		"fanout",
+		"post-exchange-direct", // name
+		"direct",
 		true,  // durable
 		false, // delete when unused
 		false, // exclusive
@@ -93,11 +95,11 @@ func (p *PostService) ConsumePost() error {
 	}
 
 	err = p.channel.QueueBind(
-		queue.Name,      // queue name
-		"",              // routing key
-		"post-exchange", // exchange
-		false,           // no-wait
-		nil,             // arguments
+		queue.Name,                        // queue name
+		strings.Split(os.Args[1], "=")[1], // routing key
+		"post-exchange-direct",            // exchange
+		false,                             // no-wait
+		nil,                               // arguments
 	)
 	if err != nil {
 		return err
@@ -151,4 +153,14 @@ func displayPosts(body []byte) {
 	log.Println("CreatedAt: ", post.CreatedAt)
 	log.Println("UpdatedAt: ", post.UpdatedAt)
 	fmt.Println("")
+}
+
+func determineRoutingKey(id int64) string {
+	if id%3 == 0 && id%5 == 0 {
+		return "fizzbuzz"
+	} else if id%3 == 0 {
+		return "fizz"
+	}
+
+	return "buzz"
 }
