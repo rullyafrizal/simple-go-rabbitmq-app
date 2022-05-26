@@ -1,15 +1,16 @@
-package main
+package test
 
 import (
 	"log"
 	"simple-go-rabbitmq-app/configs"
 	"simple-go-rabbitmq-app/internal/handlers"
+	"testing"
 
 	"github.com/joho/godotenv"
 )
 
-func main() {
-	err := godotenv.Load()
+func TestPublish(t *testing.T) {
+	err := godotenv.Load("../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file:", err)
 	}
@@ -26,13 +27,8 @@ func main() {
 
 	postHandler := handlers.NewPosthandler(ch)
 
-	// err = postHandler.CreatePost()
-	// if err != nil {
-	// 	log.Fatal("Failed to create post: ", err)
-	// }
-
-	err = postHandler.GetPosts()
+	err = postHandler.CreatePost()
 	if err != nil {
-		log.Fatal("Failed to get posts: ", err)
+		log.Fatal("Failed to create post: ", err)
 	}
 }

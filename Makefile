@@ -3,3 +3,6 @@ build:
 
 start:
 	go run cmd/main.go
+
+publish:
+	go test ./tests/... -v -count=1

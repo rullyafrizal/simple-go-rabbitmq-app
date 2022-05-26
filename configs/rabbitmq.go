@@ -2,11 +2,15 @@ package configs
 
 import (
 	"fmt"
+	"log"
 	"simple-go-rabbitmq-app/utils"
+
+	"github.com/rabbitmq/amqp091-go"
 )
 
 type RabbitmqConfigContract interface {
 	BuildConfigString() string
+	ConnectToRabbitmq() *amqp091.Connection
 }
 
 type RabbitmqConfig struct {
@@ -27,4 +31,14 @@ func NewRabbitmqConfig() RabbitmqConfigContract {
 
 func (r *RabbitmqConfig) BuildConfigString() string {
 	return fmt.Sprintf("amqp://%s:%s@%s:%s/", r.User, r.Pass, r.Host, r.Port)
+}
+
+func (r *RabbitmqConfig) ConnectToRabbitmq() *amqp091.Connection {
+	log.Println("Connecting to RabbitMQ...")
+	conn, err := amqp091.Dial(r.BuildConfigString())
+	if err != nil {
+		log.Fatal("Failed to connect to RabbitMQ: ", err)
+	}
+
+	return conn
 }
