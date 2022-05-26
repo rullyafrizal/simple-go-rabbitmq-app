@@ -26,13 +26,14 @@ func NewPostService(ch *amqp091.Channel) PostServiceContract {
 }
 
 func (p *PostService) PublishPost(post models.Post) error {
-	queue, err := p.channel.QueueDeclare(
-		"post-queue", // name
-		true,         // durable
-		false,        // delete when unused
-		false,        // exclusive
-		false,        // no-wait
-		nil,          // arguments
+	err := p.channel.ExchangeDeclare(
+		"post-exchange", // name
+		"fanout",
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
 	)
 	if err != nil {
 		return err
@@ -46,10 +47,10 @@ func (p *PostService) PublishPost(post models.Post) error {
 	log.Println("Publishing post to RabbitMQ...")
 
 	err = p.channel.Publish(
-		"",         // exchange
-		queue.Name, // routing key
-		false,      // mandatory
-		false,      // immediate
+		"post-exchange", // exchange
+		"",              // routing key
+		false,           // mandatory
+		false,           // immediate
 		amqp091.Publishing{
 			DeliveryMode: amqp091.Persistent, // the message will survive server restarts/down
 			ContentType:  "application/json",
@@ -66,13 +67,37 @@ func (p *PostService) PublishPost(post models.Post) error {
 }
 
 func (p *PostService) ConsumePost() error {
+	err := p.channel.ExchangeDeclare(
+		"post-exchange", // name
+		"fanout",
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	if err != nil {
+		return err
+	}
+
 	queue, err := p.channel.QueueDeclare(
-		"post-queue", // name
-		true,         // durable
-		false,        // delete when unused
-		false,        // exclusive
-		false,        // no-wait
-		nil,          // arguments
+		"",    // name
+		false, // durable
+		false, // delete when unused
+		true,  // exclusive
+		false,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	err = p.channel.QueueBind(
+		queue.Name,      // queue name
+		"",              // routing key
+		"post-exchange", // exchange
+		false,           // no-wait
+		nil,             // arguments
 	)
 	if err != nil {
 		return err
