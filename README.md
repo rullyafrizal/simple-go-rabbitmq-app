@@ -1,4 +1,4 @@
-# RabbitMQ Work Queues
+# RabbitMQ Routing
 
 ## Reference
 - https://www.rabbitmq.com/tutorials/tutorial-four-go.html
