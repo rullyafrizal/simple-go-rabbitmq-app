@@ -1,4 +1,4 @@
-# RabbitMQ Work Queues
+# RabbitMQ Pub Sub
 
 ## Reference
 [- https://www.rabbitmq.com/tutorials/tutorial-two-go.html](https://www.rabbitmq.com/tutorials/tutorial-three-go.html)
