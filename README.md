@@ -1,7 +1,7 @@
 # RabbitMQ Work Queues
 
 ## Reference
-[- https://www.rabbitmq.com/tutorials/tutorial-two-go.html](https://www.rabbitmq.com/tutorials/tutorial-three-go.html)
+- https://www.rabbitmq.com/tutorials/tutorial-four-go.html
 
 ## Konsep
 Konsep utama dari messaging sendiri di RabbitMQ adalah publisher tidak mengirim data secara langsung ke queue, bahkan publisher tidak tahu-menahu apakah data dikirimkan ke queue. Publisher hanya bertanggung jawab untuk mengirimkan data ke exchange.<br>
