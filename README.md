@@ -35,4 +35,4 @@ make start
 make publish
 ```
 
-Terminal-terminal yang kita gunakan untuk menyalakan consumer akan terbagi rata konsumsinya.
+Terminal-terminal yang kita gunakan untuk menyalakan consumer akan menerima semua data dengan sama.
