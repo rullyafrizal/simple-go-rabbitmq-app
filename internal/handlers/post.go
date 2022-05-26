@@ -25,8 +25,9 @@ func NewPosthandler(ch *amqp091.Channel) PostHandlerContract {
 }
 
 func (h *PostHandler) CreatePost() error {
-	for i := 0; i < 1000000; i++ {
+	for i := 0; i < 1000; i++ {
 		post := models.Post{
+			ID:        i,
 			Title:     "This is post " + strconv.Itoa(i),
 			Content:   "This is content " + strconv.Itoa(i),
 			Image:     "This is image " + strconv.Itoa(i),
@@ -44,7 +45,7 @@ func (h *PostHandler) CreatePost() error {
 }
 
 func (h *PostHandler) GetPosts() error {
-	_, err := h.Service.ConsumePost()
+	err := h.Service.ConsumePost()
 	if err != nil {
 		return err
 	}

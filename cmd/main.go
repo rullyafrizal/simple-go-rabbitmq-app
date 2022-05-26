@@ -26,11 +26,6 @@ func main() {
 
 	postHandler := handlers.NewPosthandler(ch)
 
-	// err = postHandler.CreatePost()
-	// if err != nil {
-	// 	log.Fatal("Failed to create post: ", err)
-	// }
-
 	err = postHandler.GetPosts()
 	if err != nil {
 		log.Fatal("Failed to get posts: ", err)

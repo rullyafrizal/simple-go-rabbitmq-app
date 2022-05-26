@@ -3,11 +3,12 @@
 ## Installation
 - Pastikan sudah install Go dan Docker
 - Copy `.env.example` dan rename menjadi `.env`
+- Run `go mod download`
 - Jalankan command berikut:
 ```
 docker compose up -d
 ```
-<br>tunggu hingga proses pull image dan build container selesai <br>
+tunggu hingga proses pull image dan build container selesai <br>
 - Selanjutnya, untuk menyalakan consumer jalankan command berikut:
 ```
 make start

@@ -2,15 +2,17 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"simple-go-rabbitmq-app/internal/models"
+	"sync"
 
 	"github.com/rabbitmq/amqp091-go"
 )
 
 type PostServiceContract interface {
 	PublishPost(post models.Post) error
-	ConsumePost() ([][]byte, error)
+	ConsumePost() error
 }
 
 type PostService struct {
@@ -47,10 +49,11 @@ func (p *PostService) PublishPost(post models.Post) error {
 		"",         // exchange
 		queue.Name, // routing key
 		false,      // mandatory
-		false,		// immediate
+		false,      // immediate
 		amqp091.Publishing{
-			ContentType: "application/json",
-			Body:        body,
+			DeliveryMode: amqp091.Persistent, // the message will survive server restarts/down
+			ContentType:  "application/json",
+			Body:         body,
 		},
 	)
 	if err != nil {
@@ -62,9 +65,7 @@ func (p *PostService) PublishPost(post models.Post) error {
 	return nil
 }
 
-func (p *PostService) ConsumePost() ([][]byte, error) {
-	var posts [][]byte
-
+func (p *PostService) ConsumePost() error {
 	queue, err := p.channel.QueueDeclare(
 		"post-queue", // name
 		true,         // durable
@@ -74,7 +75,7 @@ func (p *PostService) ConsumePost() ([][]byte, error) {
 		nil,          // arguments
 	)
 	if err != nil {
-		return posts, err
+		return err
 	}
 
 	post, err := p.channel.Consume(
@@ -87,20 +88,26 @@ func (p *PostService) ConsumePost() ([][]byte, error) {
 		nil,        // args
 	)
 	if err != nil {
-		return posts, err
+		return err
 	}
 
 	log.Println("Consuming posts from RabbitMQ...")
 
-	// this is where we iterate over the channel
-	// for range will wait and stand by to display post until the channel is closed
-	for p := range post {
-		displayPosts(p.Body)
-	}
+	var wg sync.WaitGroup
 
-	defer log.Println("Posts successfully consumed from RabbitMQ")
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		// this is where we iterate over the channel
+		// for range will wait and stand by to display post until the channel is closed
+		for p := range post {
+			displayPosts(p.Body)
+		}
+	}()
 
-	return posts, nil
+	wg.Wait()
+
+	return err
 }
 
 func displayPosts(body []byte) {
@@ -111,30 +118,12 @@ func displayPosts(body []byte) {
 		log.Println(err)
 	}
 
-	log.Println("===========================")
+	fmt.Println("")
+	log.Println("ID:", post.ID)
 	log.Println("Title: ", post.Title)
 	log.Println("Content: ", post.Content)
 	log.Println("Image: ", post.Image)
 	log.Println("CreatedAt: ", post.CreatedAt)
 	log.Println("UpdatedAt: ", post.UpdatedAt)
-	log.Println("===========================")
-}
-
-func printPost(ch <-chan amqp091.Delivery) {
-	for d := range ch {
-		var post models.Post
-
-		err := json.Unmarshal(d.Body, &post)
-		if err != nil {
-			log.Println(err)
-		}
-
-		log.Println("===========================")
-		log.Println("Title: ", post.Title)
-		log.Println("Content: ", post.Content)
-		log.Println("Image: ", post.Image)
-		log.Println("CreatedAt: ", post.CreatedAt)
-		log.Println("UpdatedAt: ", post.UpdatedAt)
-		log.Println("===========================")
-	}
+	fmt.Println("")
 }
