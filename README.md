@@ -4,6 +4,7 @@
 Dalam repository ini, saya taruh metode penggunaan RabbitMQ dalam beberapa branch menganut pada tutorial di website resmi [RabbitMQ](https://www.rabbitmq.com/getstarted.html)
 - [Work Queues](https://github.com/rullyafrizal/simple-go-rabbitmq-app/tree/work-queues)
 - [Pub/Sub](https://github.com/rullyafrizal/simple-go-rabbitmq-app/tree/pub-sub)
+- [Routing](https://github.com/rullyafrizal/simple-go-rabbitmq-app/tree/routing)
 
 ## Installation
 - Pastikan sudah install Go dan Docker
